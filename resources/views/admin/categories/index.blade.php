@@ -1,0 +1,119 @@
+@extends('layouts.admin')
+
+@section('title', 'Manage Categories')
+
+@section('content')
+<div class="container mx-auto py-10 px-6">
+
+    <!-- Header + Search -->
+    <div class="flex flex-col md:flex-row items-center justify-between mb-10 gap-4">
+        <h1 class="text-3xl font-bold text-[#3c2c20]">Manage Categories</h1>
+
+        <div class="flex items-center gap-3 w-full md:w-auto">
+            <!-- Search -->
+            <form method="GET" action="{{ route('admin.categories.index') }}"
+                class="flex items-center border border-[#d6c7b4] rounded-lg overflow-hidden w-full md:w-72 bg-white shadow-sm focus-within:ring-2 focus-within:ring-[#b18457]/50">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search categories..."
+                    class="flex-1 px-4 py-2 focus:outline-none text-[#3c2c20] placeholder:text-[#a58f7a] bg-transparent">
+
+                @if(request('search'))
+                <a href="{{ route('admin.categories.index') }}"
+                    class="px-3 text-[#b18457] hover:text-[#3c2c20] transition" title="Clear search">
+                    <i class="fa-solid fa-xmark"></i>
+                </a>
+                @endif
+
+                <button type="submit"
+                    class="bg-[#b18457] px-4 py-2 text-white hover:bg-[#a1744a] transition-all">
+                    <i class="fa-solid fa-search"></i>
+                </button>
+            </form>
+
+            <!-- Add Category -->
+            <a href="{{ route('admin.categories.create') }}"
+                class="bg-[#b18457] hover:bg-[#a1744a] text-white font-semibold px-5 py-2 rounded-lg shadow-md transition-all flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Category</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Alerts -->
+    @if(session('success'))
+    <div class="mb-6 px-4 py-3 rounded-lg bg-green-100 border border-green-300 text-green-700 shadow-sm">
+        {{ session('success') }}
+    </div>
+    @endif
+
+    @if(session('error'))
+    <div class="mb-6 px-4 py-3 rounded-lg bg-red-100 border border-red-300 text-red-800 shadow-sm">
+        {{ session('error') }}
+    </div>
+    @endif
+
+    <!-- Table -->
+    <div class="bg-white shadow-xl rounded-2xl border border-[#e6dbc9] overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead class="bg-[#f4ece1] text-[#3c2c20] text-sm uppercase tracking-wide">
+                <tr>
+                    <th class="px-6 py-3 font-semibold">S No.</th>
+                    <th class="px-6 py-3 font-semibold">Category Name</th>
+                    <th class="px-6 py-3 font-semibold">Slug</th>
+                    <th class="px-6 py-3 text-right font-semibold">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-[#f1e9dd]">
+                @forelse($categories as $category)
+                <tr class="hover:bg-[#f9f6f1] transition duration-200">
+
+                    <td class="px-6 py-3 text-[#3c2c20]">{{ $category->id }}</td>
+
+                    <td class="px-6 py-3 font-semibold text-[#3c2c20]">{{ $category->name }}</td>
+
+                    <td class="px-6 py-3 text-[#6b6156]">{{ $category->slug }}</td>
+
+                    <td class="px-6 py-3 text-right space-x-3 whitespace-nowrap">
+
+                        <!-- Edit -->
+                        <a href="{{ route('admin.categories.edit', $category->id) }}"
+                            class="inline-flex items-center gap-1 text-[#3c2c20] hover:text-[#b18457] font-medium transition">
+                            <i class="fa-solid fa-pen-to-square"></i> Edit
+                        </a>
+
+                        <!-- Delete -->
+                        <form action="{{ route('admin.categories.destroy', $category->id) }}" method="POST"
+                            class="inline-block"
+                            onsubmit="return confirm('Are you sure you want to delete this category?');">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit"
+                                class="inline-flex items-center gap-1 text-red-600 hover:text-red-700 font-medium transition">
+                                <i class="fa-solid fa-trash"></i> Delete
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>
+                @empty
+                <tr>
+                    <td colspan="4" class="px-6 py-12 text-center text-gray-500 italic">
+                        No categories found.
+                    </td>
+                </tr>
+                @endforelse
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    @if ($categories->hasPages())
+    <div class="flex justify-center mt-10">
+        <div class="inline-flex items-center space-x-2 bg-[#f9f6f1] border border-[#e0d6c6] shadow-md px-4 py-2 rounded-full">
+            {{ $categories->onEachSide(1)->appends(['search' => request('search')])->links('vendor.pagination.custom-tailwind') }}
+        </div>
+    </div>
+    @endif
+
+</div>
+@endsection
